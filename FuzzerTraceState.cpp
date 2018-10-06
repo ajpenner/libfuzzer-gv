@@ -110,6 +110,49 @@ extern "C" {
 #if LLVM_FUZZER_DEFINES_SANITIZER_WEAK_HOOOKS
 
 ATTRIBUTE_INTERFACE ATTRIBUTE_NO_SANITIZE_MEMORY
+void libFuzzerCustomMemcmp(void *caller_pc, const void *s1,
+                                  const void *s2, size_t n) {
+  if (fuzzer::ScopedDoingMyOwnMemOrStr::DoingMyOwnMemOrStr) return;
+  if (n <= 1) return;  // Not interesting.
+  if ( memcmp(s1, s2, n) == 0 ) {
+      return;
+  }
+  switch ( n ) {
+      case  1:
+          {
+              const uint8_t a = *(uint8_t*)s1;
+              const uint8_t b = *(uint8_t*)s1;
+              fuzzer::TPC.HandleCmp((uintptr_t)caller_pc, a, b);
+          }
+          break;
+      case  2:
+          {
+              const uint16_t a = *(uint16_t*)s1;
+              const uint16_t b = *(uint16_t*)s1;
+              fuzzer::TPC.HandleCmp((uintptr_t)caller_pc, a, b);
+          }
+          break;
+      case  4:
+          {
+              const uint32_t a = *(uint32_t*)s1;
+              const uint32_t b = *(uint32_t*)s1;
+              fuzzer::TPC.HandleCmp((uintptr_t)caller_pc, a, b);
+          }
+          break;
+      case  8:
+          {
+              const uint64_t a = *(uint64_t*)s1;
+              const uint64_t b = *(uint64_t*)s1;
+              fuzzer::TPC.HandleCmp((uintptr_t)caller_pc, a, b);
+          }
+          break;
+      default:
+          fuzzer::TPC.AddValueForMemcmp(caller_pc, s1, s2, n, /*StopAtZero*/false);
+          break;
+  }
+}
+
+ATTRIBUTE_INTERFACE ATTRIBUTE_NO_SANITIZE_MEMORY
 void __sanitizer_weak_hook_memcmp(void *caller_pc, const void *s1,
                                   const void *s2, size_t n, int result) {
   if (fuzzer::ScopedDoingMyOwnMemOrStr::DoingMyOwnMemOrStr) return;

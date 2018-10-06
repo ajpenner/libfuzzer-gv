@@ -301,20 +301,6 @@ void TracePC::AddValueForMemcmp(void *caller_pc, const void *s1, const void *s2,
   TORCW.Insert(Idx ^ Hash, Word(B1, Len), Word(B2, Len));
 }
 
-template <class T>
-ATTRIBUTE_TARGET_POPCNT ALWAYS_INLINE
-ATTRIBUTE_NO_SANITIZE_ALL
-void TracePC::HandleCmp(uintptr_t PC, T Arg1, T Arg2) {
-  uint64_t ArgXor = Arg1 ^ Arg2;
-  uint64_t ArgDistance = __builtin_popcountll(ArgXor) + 1; // [1,65]
-  uintptr_t Idx = ((PC & 4095) + 1) * ArgDistance;
-  if (sizeof(T) == 4)
-      TORC4.Insert(ArgXor, Arg1, Arg2);
-  else if (sizeof(T) == 8)
-      TORC8.Insert(ArgXor, Arg1, Arg2);
-  ValueProfileMap.AddValue(Idx);
-}
-
 } // namespace fuzzer
 
 static void getStackDepth(void) {

@@ -75,7 +75,20 @@ class TracePC {
   void HandleInit(uint32_t *Start, uint32_t *Stop);
   void HandleInline8bitCountersInit(uint8_t *Start, uint8_t *Stop);
   void HandleCallerCallee(uintptr_t Caller, uintptr_t Callee);
-  template <class T> void HandleCmp(uintptr_t PC, T Arg1, T Arg2);
+  template <class T>
+      ATTRIBUTE_TARGET_POPCNT ALWAYS_INLINE
+      ATTRIBUTE_NO_SANITIZE_ALL
+      void HandleCmp(uintptr_t PC, T Arg1, T Arg2) {
+          uint64_t ArgXor = Arg1 ^ Arg2;
+          uint64_t ArgDistance = __builtin_popcountll(ArgXor) + 1; // [1,65]
+          uintptr_t Idx = ((PC & 4095) + 1) * ArgDistance;
+          if (sizeof(T) == 4)
+              TORC4.Insert(ArgXor, Arg1, Arg2);
+          else if (sizeof(T) == 8)
+              TORC8.Insert(ArgXor, Arg1, Arg2);
+          ValueProfileMap.AddValue(Idx);
+      }
+
   size_t GetTotalPCCoverage();
   const size_t GetStackDepthRecord() const;
   const size_t GetStackUniqueRecord() const;
