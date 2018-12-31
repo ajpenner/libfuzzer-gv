@@ -263,6 +263,7 @@ Fuzzer::Fuzzer(UserCallback CB, InputCorpus &Corpus, MutationDispatcher &MD,
   TPC.SetIntensityGuided(Options.IntensityGuided);
   TPC.SetAllocGuided(Options.AllocGuided);
   TPC.SetCustomGuided(Options.CustomGuided);
+  TPC.SetDoLoopDetection(Options.LoopDetection);
 
   if ( EF->LLVMFuzzerCustomGuidance ) {
       customValues = new std::vector<std::pair<size_t, size_t>>;

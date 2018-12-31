@@ -577,6 +577,7 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
   Options.AllocGuided = Flags.alloc_guided;
   Options.CustomGuided = Flags.custom_guided;
   Options.NoCoverageGuided = Flags.no_coverage_guided;
+  Options.LoopDetection = Flags.loop_detection;
   Options.Shrink = Flags.shrink;
   Options.ShuffleAtStartUp = Flags.shuffle;
   Options.PreferSmall = Flags.prefer_small;

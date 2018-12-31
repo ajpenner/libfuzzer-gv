@@ -140,6 +140,8 @@ class TracePC {
   void SetCustomFuncGuided(bool C) { CustomFuncGuided = C; }
   bool IsCustomFuncGuided(void) { return CustomFuncGuided;}
   void SetNoCoverageGuided(bool C) { NoCoverageGuided = C; }
+  bool DoLoopDetection(void) { return LoopDetection;}
+  void SetDoLoopDetection(bool C) { LoopDetection = C;}
   void SetPrintNewPCs(bool P) { DoPrintNewPCs = P; }
   template <class Callback> void CollectFeatures(Callback CB) const;
 
@@ -185,6 +187,7 @@ private:
   bool CustomGuided = false;
   bool CustomFuncGuided = false;
   bool NoCoverageGuided = false;
+  bool LoopDetection = false;
   bool DoPrintNewPCs = false;
 
   struct Module {

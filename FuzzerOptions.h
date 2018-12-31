@@ -37,6 +37,7 @@ struct FuzzingOptions {
   bool AllocGuided = false;
   bool CustomGuided = false;
   bool NoCoverageGuided = false;
+  bool LoopDetection = false;
   bool Shrink = false;
   int ReloadIntervalSec = 1;
   bool ShuffleAtStartUp = true;

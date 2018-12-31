@@ -453,4 +453,57 @@ void __sanitizer_cov_trace_gep(uintptr_t Idx) {
   uintptr_t PC = reinterpret_cast<uintptr_t>(__builtin_return_address(0));
   fuzzer::TPC.HandleCmp(PC, Idx, (uintptr_t)0);
 }
+
+std::vector<void*> stackTrace;
+std::set< std::pair<void*, void*> > loopsSeen;
+
+static std::vector<void*> getStackRange(const size_t start, const size_t end) {
+    std::vector<void*> ret;
+    for (size_t i = start; i <= end; i++) {
+        ret.push_back(stackTrace[i]);
+    }
+
+    return ret;
+}
+
+static void findLoops(void) {
+    const size_t size = stackTrace.size();
+    if ( size < 2 ) {
+        return;
+    }
+    for (size_t i = 0; i < size; i++) {
+        void* cur = stackTrace[i];
+        for (size_t j = i+1; j < size; j++) {
+            if ( stackTrace[j] == cur ) {
+                const auto range = getStackRange(i, j);
+                if ( loopsSeen.insert( std::pair<void*, void*>(range.front(), range.back()) ).second == true ) {
+                    printf("Loop detected:\n");
+                    for (size_t k = 0; k < range.size(); k++) {
+                        printf("%p\n", range[k]);
+                    }
+                }
+            }
+        }
+    }
+}
+ATTRIBUTE_INTERFACE
+ATTRIBUTE_NO_SANITIZE_ALL
+ATTRIBUTE_TARGET_POPCNT
+void __cyg_profile_func_enter(void *this_fn, void *call_site) {
+  if ( fuzzer::TPC.DoLoopDetection() ) {
+    stackTrace.push_back(this_fn);
+    findLoops();
+  }
+}
+
+ATTRIBUTE_INTERFACE
+ATTRIBUTE_NO_SANITIZE_ALL
+ATTRIBUTE_TARGET_POPCNT
+void __cyg_profile_func_exit(void *this_fn, void *call_site) {
+  if ( fuzzer::TPC.DoLoopDetection() ) {
+      if ( !stackTrace.empty() ) {
+          stackTrace.pop_back();
+      }
+  }
+}
 }  // extern "C"
