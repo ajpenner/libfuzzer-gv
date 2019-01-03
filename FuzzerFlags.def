@@ -69,7 +69,7 @@ FUZZER_FLAG_INT(stack_depth_guided, 0,
 FUZZER_FLAG_INT(stack_unique_guided, 0,
                 "Experimental. Use # unique stack pointers to guide fuzzing.")
 FUZZER_FLAG_INT(alloc_guided, 0,
-                "Experimental. Use heap allocation size to guide fuzzing.")
+                "Experimental. Use heap allocation size to guide fuzzing. 1 = use ASAN hooks, 2 = use direct malloc hooks.")
 FUZZER_FLAG_INT(custom_guided, 0,
                 "Use custom values to guide fuzzing.")
 FUZZER_FLAG_INT(intensity_guided, 0,

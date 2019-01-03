@@ -135,7 +135,7 @@ class TracePC {
   bool StackDepthGuidedEnabled(void) { return StackDepthGuided; }
   bool StackUniqueGuidedEnabled(void) { return StackUniqueGuided; }
   void SetIntensityGuided(bool I) { IntensityGuided = I; }
-  void SetAllocGuided(bool A) { AllocGuided = A; }
+  void SetAllocGuided(int A) { AllocGuided = A; }
   void SetCustomGuided(bool I) { CustomGuided = I; }
   void SetCustomFuncGuided(bool C) { CustomFuncGuided = C; }
   bool IsCustomFuncGuided(void) { return CustomFuncGuided;}
@@ -181,7 +181,7 @@ private:
   bool StackDepthGuided = false;
   bool StackUniqueGuided = false;
   bool IntensityGuided = false;
-  bool AllocGuided = false;
+  int AllocGuided = 0;
   bool CustomGuided = false;
   bool CustomFuncGuided = false;
   bool NoCoverageGuided = false;

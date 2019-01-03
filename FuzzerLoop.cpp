@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <unistd.h>
+#include <malloc.h>
 
 #if defined(__has_include)
 #if __has_include(<sanitizer / coverage_interface.h>)
@@ -198,7 +199,7 @@ class AllocationTracker
 };
 
 AllocationTracker* allocationTracker = NULL;
-bool optAllocGuided = false;
+int optAllocGuided = 0;
 
 ATTRIBUTE_NO_SANITIZE_MEMORY
 void MallocHook(const volatile void *ptr, size_t size) {
@@ -225,6 +226,49 @@ void FreeHook(const volatile void *ptr) {
   }
 }
 
+static void *malloc_hook_malloc (size_t, const void *);
+static void malloc_hook_free (void*, const void *);
+static void *(*old_malloc_hook) (size_t, const void *) = NULL;
+static void (*old_free_hook) (void*, const void *) = NULL;
+
+static void
+malloc_hook_init (void)
+{
+  old_malloc_hook = __malloc_hook;
+  old_free_hook = __free_hook;
+  __malloc_hook = malloc_hook_malloc;
+  __free_hook = malloc_hook_free;
+}
+
+static void *
+malloc_hook_malloc (size_t size, const void *caller)
+{
+  void *result;
+  __malloc_hook = old_malloc_hook;
+  __free_hook = old_free_hook;
+  result = malloc (size);
+  old_malloc_hook = __malloc_hook;
+  old_free_hook = __free_hook;
+  allocationTracker->addMalloc(result, size);
+  __malloc_hook = malloc_hook_malloc;
+  __free_hook = malloc_hook_free;
+  return result;
+}
+
+static void
+malloc_hook_free (void *ptr, const void *caller)
+{
+  __malloc_hook = old_malloc_hook;
+  __free_hook = old_free_hook;
+  free (ptr);
+  old_malloc_hook = __malloc_hook;
+  old_free_hook = __free_hook;
+  allocationTracker->addFree(ptr);
+  __malloc_hook = malloc_hook_malloc;
+  __free_hook = malloc_hook_free;
+}
+
+
 // Crash on a single malloc that exceeds the rss limit.
 void Fuzzer::HandleMalloc(size_t Size) {
   if (!Options.RssLimitMb || (Size >> 20) < (size_t)Options.RssLimitMb)
@@ -243,9 +287,12 @@ void Fuzzer::HandleMalloc(size_t Size) {
 Fuzzer::Fuzzer(UserCallback CB, InputCorpus &Corpus, MutationDispatcher &MD,
                FuzzingOptions Options)
     : CB(CB), Corpus(Corpus), MD(MD), Options(Options) {
-  if (Options.AllocGuided) {
+  optAllocGuided = Options.AllocGuided;
+  if (optAllocGuided ) {
       allocationTracker = new AllocationTracker(1024*1024);
-      optAllocGuided = true;
+      if (optAllocGuided == 2) {
+          malloc_hook_init();
+      }
   }
   if (EF->__sanitizer_set_death_callback)
     EF->__sanitizer_set_death_callback(StaticDeathCallback);

@@ -34,7 +34,7 @@ struct FuzzingOptions {
   bool StackDepthGuided = false;
   bool StackUniqueGuided = false;
   bool IntensityGuided = false;
-  bool AllocGuided = false;
+  int AllocGuided = 0;
   bool CustomGuided = false;
   bool NoCoverageGuided = false;
   bool Shrink = false;

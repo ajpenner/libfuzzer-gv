@@ -25,7 +25,7 @@ FuzzerIOPosix.o: FuzzerIOPosix.cpp
 FuzzerIOWindows.o: FuzzerIOWindows.cpp
 	clang++ -Wall -c -g -O2 -std=c++11 FuzzerIOWindows.cpp
 FuzzerLoop.o: FuzzerLoop.cpp
-	clang++ -Wall -c -g -O2 -std=c++11 FuzzerLoop.cpp
+	clang++ -Wno-deprecated-declarations -Wall -c -g -O2 -std=c++11 FuzzerLoop.cpp
 FuzzerMain.o: FuzzerMain.cpp
 	clang++ -Wall -c -g -O2 -std=c++11 FuzzerMain.cpp
 FuzzerMerge.o: FuzzerMerge.cpp
