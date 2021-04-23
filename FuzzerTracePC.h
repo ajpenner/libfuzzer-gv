@@ -76,7 +76,7 @@ class TracePC {
   void HandleInline8bitCountersInit(uint8_t *Start, uint8_t *Stop);
   void HandleCallerCallee(uintptr_t Caller, uintptr_t Callee);
   template <class T>
-      ATTRIBUTE_TARGET_POPCNT ALWAYS_INLINE
+      ALWAYS_INLINE
       ATTRIBUTE_NO_SANITIZE_ALL
       void HandleCmp(uintptr_t PC, T Arg1, T Arg2) {
           uint64_t ArgXor = Arg1 ^ Arg2;
